@@ -39,9 +39,9 @@ extern "C" {
 #define EA_CTRL_TX_EN		0x01
 
 // Offset 0x28 - Int Coalesce
-#define EA_INT_HOLDOFF_BYTES_MASK    0xF
-#define EA_INT_HOLDOFF_BYTES_SHIFT   24
-#define EA_INT_HOLDOFF_CLK_CNT_MASK  0xFFFF
+#define EA_INT_HOLDOFF_BYTES_MASK    0x7FF
+#define EA_INT_HOLDOFF_BYTES_SHIFT   16
+#define EA_INT_HOLDOFF_CLK_CNT_MASK  0x7FF
 #define EA_INT_HOLDOFF_CLK_CNT_SHIFT 0
 /**************************** Type Definitions *****************************/
 /**
@@ -110,4 +110,3 @@ extern "C" {
 }
 #endif
 #endif // E_UART_H
-

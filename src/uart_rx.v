@@ -66,7 +66,7 @@ assign rx_byte             = {rx_samples[(5*8)+2],
 always@(posedge clk) begin
     en_dly <= rst ? 2'b00 : {en_dly[0], en};
     
-    casex({rst & ~en, start_det, dv_inhibit_cntr_eq0, sample_clk_cntr_eq0})
+    casex({rst | ~en, start_det, dv_inhibit_cntr_eq0, sample_clk_cntr_eq0})
         4'b1xxx: dv_inhibit_cntr <= 45;
         4'b01xx: dv_inhibit_cntr <= 45;
         4'b001x: dv_inhibit_cntr <= 0;
@@ -74,7 +74,7 @@ always@(posedge clk) begin
         default:dv_inhibit_cntr <= dv_inhibit_cntr;
     endcase
     
-    casex({rst & ~en, ld_sample_clk_cntr, sample_clk_cntr_eq0})
+    casex({rst | ~en, ld_sample_clk_cntr, sample_clk_cntr_eq0})
         3'b1xx: sample_clk_cntr <= 10'b11_1111_1111;
         3'b01x: sample_clk_cntr <= over_sample_clk_cnt;
         3'b000: sample_clk_cntr <= sample_clk_cntr - 1;

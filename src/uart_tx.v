@@ -61,7 +61,7 @@ wire cs_eq_tx_b;
 wire cs_eq_stop;
 wire tx_bit_cntr_eq0;
 
-assign clk_cntr_eq0 = (clk_cntr == 10'b00_0000_0000);
+assign clk_cntr_eq0 = (clk_cntr == 13'b000_0000_0000);
 assign cs_eq_start  = (current_state == START);
 assign cs_eq_tx_b   = (current_state == TX_B);
 assign cs_eq_stop   = (current_state == STOP);
@@ -136,7 +136,7 @@ always@(posedge clk) begin
     casex({rst | ~en, ld_clk_cntr, ld_clk_cntr_s, clk_cntr_eq0})    // counter to generate baudrate
         4'b1xxx: clk_cntr <= 0;
         4'b01xx: clk_cntr <= baud_clk_cnt;
-        4'b001x: clk_cntr <= {1'b0, baud_clk_cnt[9:1]};
+        4'b001x: clk_cntr <= {1'b0, baud_clk_cnt[12:1]};
         4'b0001: clk_cntr <= 0;
         default: clk_cntr <= clk_cntr-1;
     endcase

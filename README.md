@@ -162,21 +162,24 @@ Care should be taken not to underrun the Receive FIFO as there are no checks in 
 - Tx Baudrate Divisor = Round(AxiClockHz/BaudRate) - 1 
 
 ### Oversample Rate Counter Register
-| 31:13 | 9:0 |
+| 31:10 | 9:0 |
 | - | - |
 | Reserved | Rx Oversample Divisor |
 
 - 1/5th the number of clock ticks minus 1 for a single bit at the desired baud rate in AXI-Clock units
 - This is used to determine the sample time for the 5x oversampler.
 - Rx Oversample Divisor = Round(AxiClockHz / (BuadRate * 5)) - 1
+- Intended mode of operation is to program this register together with the Baudrate Counter Register so the transmit and receive logic are configured for the same effective baud rate.
 
 ### Interrupt Holdoff Register
-| 31:27 | 26:16 | 15:0 |
-| - | - | - |
-| Reserved | Rx FIFO Byte Threshold Count | Rx Byte Time Coalesce Count |
+| 31:27 | 26:16 | 15:11 | 10:0 |
+| - | - | - | - |
+| Reserved | Rx FIFO Byte Threshold Count | Reserved | Rx Byte Time Coalesce Count |
 
 - Rx FIFO Byte Threshold Count - Number of bytes present in the Rx FIFO to trigger this interrupt
 - Rx Byte Time Coalesce Count - Number of byte times elapsed after the first received byte to trigger this interrupt
+- The intended mode of operation is for the transmit baudrate divisor and receive oversample divisor to be programmed together with values coherent to the TX and RX sides running at the same effective baud rate.
+- The holdoff timeout counter intentionally uses the transmit baudrate divisor to measure elapsed byte times. With coherent programming, this produces the expected receive timeout behavior while keeping the holdoff logic simple.
 
 ### Transmit FIFO Count Register
 | 31:11 | 10:0 |
@@ -203,5 +206,4 @@ Number of bytes present in the Rx FIFO
 ### Consider making a 64-bit varient to support 64-bit AXI Bus / processor support
 
 - Add 64-bit wide registers for FIFO Read and FIFO Writes
-
 

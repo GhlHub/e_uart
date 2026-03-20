@@ -57,20 +57,20 @@ reg [12:0]  bit_time_cntr;
 
 wire rx_empty_negedge;
 wire rx_empty_posedge;
-wire elapsed_bit_time_eq_10;
+wire elapsed_bit_time_eq_9;
 wire bit_time_cntr_eq_baud_clk_cnt;
 wire bit_time_tick;
 
 assign rx_empty_negedge  =  rx_empty_d1 & ~rx_empty;
 assign rx_empty_posedge  = ~rx_empty_d1 &  rx_empty;
-assign elapsed_bit_time_eq_10 = (bit_times_elapsed == 10);
+assign elapsed_bit_time_eq_9 = (bit_times_elapsed == 9);
 assign bit_time_cntr_eq_baud_clk_cnt = (bit_time_cntr == baud_clk_cnt);
 assign bit_time_tick = bit_time_cntr_eq_baud_clk_cnt;
 
 // Logic to perform interrupt coalescing
 always@(posedge clk) begin
     rx_empty_d1           <= rst ? 1'b1 :  rx_empty;
-    rx_byte_cnt_coal_intr <= rst ? 1'b0 : (rx_byte_count > rx_int_holdoff_byte_cnt);
+    rx_byte_cnt_coal_intr <= rst ? 1'b0 : ((rx_byte_count != 0) && (rx_byte_count >= rx_int_holdoff_byte_cnt));
 end
 
 always@(posedge clk) begin
@@ -80,7 +80,7 @@ always@(posedge clk) begin
         default: bit_time_cntr <= bit_time_cntr + 1;
     endcase
     
-    casex({rst, bit_time_tick, elapsed_bit_time_eq_10}) // Counter that increments at every bit time. When 10 bit times has elapsed, reset to zero
+    casex({rst, bit_time_tick, elapsed_bit_time_eq_9}) // Counter that increments at every bit time. When 10 bit times has elapsed, reset to zero
         3'b1xx: bit_times_elapsed <= 0;
         3'b010: bit_times_elapsed <= bit_times_elapsed + 1;
         3'b001: bit_times_elapsed <= 0;
@@ -97,14 +97,14 @@ always@(posedge clk) begin
         default:  byte_time_cntr_en <= byte_time_cntr_en;    
     endcase
     
-    casex({rst, rx_empty_posedge, (byte_time_cntr_en & elapsed_bit_time_eq_10 & ~rx_time_coal_intr)})
+    casex({rst, rx_empty_posedge, (byte_time_cntr_en & elapsed_bit_time_eq_9 & ~rx_time_coal_intr)})
         3'b1xx:  byte_time_cntr <= 0;
         3'b01x:  byte_time_cntr <= 0;
         3'b001:  byte_time_cntr <= byte_time_cntr + 1;
-        default  byte_time_cntr <= byte_time_cntr;
+        default: byte_time_cntr <= byte_time_cntr;
     endcase
 
-    rx_time_coal_intr <= rst ? 1'b0 : (byte_time_cntr > rx_int_holdoff_byte_time_cnt);    
+    rx_time_coal_intr <= rst ? 1'b0 : (byte_time_cntr_en && (byte_time_cntr >= rx_int_holdoff_byte_time_cnt));    
 end
 
 

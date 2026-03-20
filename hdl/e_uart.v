@@ -81,10 +81,8 @@ wire  rx_en;
 wire [7:0]  rx_byte_host;
 wire        rx_byte_host_dv;
 wire         rx_byte_host_rd;
-
 wire [10:0] tx_byte_count;
-wire [10:0] rx_byte_count;   
-wire [4:0]  int_status;
+wire [10:0] rx_byte_count;
 
 	
 	
