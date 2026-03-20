@@ -223,6 +223,43 @@ The following examples assume:
 | 9600 | 10417 | 10416 | 2083 | 2082 |
 | 19200 | 5208 | 5207 | 1042 | 1041 |
 
+## Estimated FPGA Resource Usage
+
+The following numbers are synthesis estimates, not post-route numbers.
+
+- Tool: Vivado 2025.2
+- Flow: out-of-context synthesis of top-level `e_uart`
+- Target part: `xc7z020clg400-1`
+- Script: `tools/report_utilization.tcl`
+
+### Top-level estimate
+
+| Resource | Used |
+| - | - |
+| LUTs | 412 |
+| FFs | 468 |
+| SRLs | 8 |
+| RAMB18 | 2 |
+| RAMB36 | 0 |
+| DSP | 0 |
+
+### Hierarchical breakdown
+
+| Hierarchy | LUTs | FFs | SRLs | RAMB18 | Notes |
+| - | - | - | - | - | - |
+| `e_uart_slave_lite_v1_0_S00_AXI` | 161 | 201 | 0 | 0 | AXI-Lite register file and interrupt/control logic |
+| `uart_top` | 263 | 267 | 8 | 2 | UART datapath plus both FIFOs |
+| `uart_top.uart_tx` | 60 | 29 | 0 | 0 | Transmit state machine |
+| `uart_top.fifo_tx` | 60 | 81 | 0 | 1 | 1024x8 transmit FIFO |
+| `uart_top.fifo_rx` | 60 | 81 | 0 | 1 | 1024x8 receive FIFO |
+| `uart_top` remaining logic | about 83 | about 76 | 8 | 0 | Primarily `uart_rx`, `int_holdoff`, and local glue logic |
+
+Notes:
+
+- The two 1024-byte FIFOs account for all block RAM usage in this estimate.
+- Vivado's hierarchical report collapsed some of the `uart_rx` and `int_holdoff` logic into the parent `uart_top`, so the final row above is derived by subtraction from the reported hierarchy.
+- Final implemented LUT count may be slightly lower after `opt_design`, placement, and routing.
+
 ## Areas that can be improved
 
 ### Split deisgn into two clock domains
