@@ -195,6 +195,34 @@ Number of bytes present in the Tx FIFO.
 
 Number of bytes present in the Rx FIFO
 
+## Baudrate Programming Examples
+
+The following examples assume:
+
+- coherent programming of the transmit baudrate divisor and receive oversample divisor
+- 5x receive oversampling
+- register values are programmed as `actual_clock_count - 1`
+
+### 50 MHz AXI Clock
+
+| Baud Rate | TX Actual AXI Clocks | BCR Register Value | RX Actual AXI Clocks | Oversample Register Value |
+| - | - | - | - | - |
+| 9600 | 5208 | 5207 | 1042 | 1041 |
+| 19200 | 2604 | 2603 | 521 | 520 |
+| 38400 | 1302 | 1301 | 260 | 259 |
+| 57600 | 868 | 867 | 174 | 173 |
+| 115200 | 434 | 433 | 87 | 86 |
+| 230400 | 217 | 216 | 43 | 42 |
+| 460800 | 109 | 108 | 22 | 21 |
+| 921600 | 54 | 53 | 11 | 10 |
+
+### 100 MHz AXI Clock
+
+| Baud Rate | TX Actual AXI Clocks | BCR Register Value | RX Actual AXI Clocks | Oversample Register Value |
+| - | - | - | - | - |
+| 9600 | 10417 | 10416 | 2083 | 2082 |
+| 19200 | 5208 | 5207 | 1042 | 1041 |
+
 ## Areas that can be improved
 
 ### Split deisgn into two clock domains
@@ -206,4 +234,3 @@ Number of bytes present in the Rx FIFO
 ### Consider making a 64-bit varient to support 64-bit AXI Bus / processor support
 
 - Add 64-bit wide registers for FIFO Read and FIFO Writes
-
