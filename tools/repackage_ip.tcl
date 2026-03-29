@@ -30,7 +30,11 @@ proc ensure_register {addr_block name display_name description offset access fie
 }
 
 set root_dir [file normalize [file dirname [info script]]/..]
-set component_path [file join $root_dir component.xml]
+if {[info exists ::env(E_UART_COMPONENT_XML)] && $::env(E_UART_COMPONENT_XML) ne ""} {
+    set component_path [file normalize $::env(E_UART_COMPONENT_XML)]
+} else {
+    set component_path [file join $root_dir component.xml]
+}
 
 puts "Opening IP core: $component_path"
 set core [ipx::open_core $component_path]

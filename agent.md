@@ -9,6 +9,7 @@ This repository contains a Vivado-packaged AXI4-Lite UART IP core with:
 - Vivado packaging metadata
 - a small software driver
 - self-checking simulation testbenches under `tb/`
+- packaged repository output under `ip_repo/e_uart/`
 
 ## Important source files
 
@@ -18,7 +19,12 @@ This repository contains a Vivado-packaged AXI4-Lite UART IP core with:
 - `src/uart_tx.v`: transmitter
 - `src/uart_rx.v`: receiver
 - `src/int_holdoff.v`: RX interrupt coalescing / holdoff logic
+- `component.xml`: legacy root-level packaged metadata kept for compatibility
+- `tools/repackage_ip.tcl`: updates register metadata and checksums for a selected `component.xml`
+- `package_ip_core.tcl`: rebuilds `ip_repo/e_uart/` from the packaged collateral in this repo
+- `ip_repo/e_uart/component.xml`: generated packaged metadata for Vivado repository discovery
 - `drivers/e_uart_v1_0/src/e_uart.h`: software-visible register field definitions
+- Current packaged supported families: `zynq`, `zynquplus`, `spartanuplus`
 
 ## Verification flow
 
@@ -54,4 +60,5 @@ Outputs are written under `out/xsim/<top>/` and include:
 - The AXI slave and driver must stay aligned on register field widths and shifts.
 - RX holdoff timing is sensitive to exact threshold semantics; preserve equality-based trigger behavior.
 - This repo contains generated Xilinx collateral. Avoid hand-editing generated IP output unless there is a clear reason.
+- Prefer editing source collateral under `hdl/`, `src/`, `xgui/`, `bd/`, and `drivers/`, then rerun `package_ip_core.tcl` instead of editing `ip_repo/e_uart/` by hand.
 - Do not assume there is complete end-to-end UART verification beyond the holdoff-focused testbenches already in `tb/`.

@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER e_uart
+	OPTION supported_peripherals = (e_uart);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.1;
+	OPTION NAME = e_uart;
+END DRIVER

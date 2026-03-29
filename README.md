@@ -223,6 +223,15 @@ The following examples assume:
 | 9600 | 10417 | 10416 | 2083 | 2082 |
 | 19200 | 5208 | 5207 | 1042 | 1041 |
 
+## Vivado IP Packaging
+
+- Packaged Vivado IP repository: `ip_repo/e_uart/`
+- Packaging helper script: `package_ip_core.tcl`
+- Regenerate the packaged repository with: `vivado -mode batch -source package_ip_core.tcl`
+- Main packaged metadata file: `ip_repo/e_uart/component.xml`
+- Supported packaged families: `zynq`, `zynquplus`, `spartanuplus`
+- The legacy root-level packaged collateral is kept for compatibility, but project `ip_repo_paths` should point at `ip_repo/`.
+
 ## Estimated FPGA Resource Usage
 
 The following numbers are synthesis estimates, not post-route numbers.
