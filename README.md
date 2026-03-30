@@ -230,7 +230,7 @@ The following examples assume:
 - Regenerate the packaged repository with: `vivado -mode batch -source package_ip_core.tcl`
 - Main packaged metadata file: `ip_repo/e_uart/component.xml`
 - Supported packaged families: `zynq`, `zynquplus`, `spartanuplus`
-- The legacy root-level packaged collateral is kept for compatibility, but project `ip_repo_paths` should point at `ip_repo/`.
+- Projects should point `ip_repo_paths` at `ip_repo/`. The packaged metadata lives under `ip_repo/e_uart/component.xml`.
 
 ## Estimated FPGA Resource Usage
 

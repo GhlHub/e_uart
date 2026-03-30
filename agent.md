@@ -19,10 +19,10 @@ This repository contains a Vivado-packaged AXI4-Lite UART IP core with:
 - `src/uart_tx.v`: transmitter
 - `src/uart_rx.v`: receiver
 - `src/int_holdoff.v`: RX interrupt coalescing / holdoff logic
-- `component.xml`: legacy root-level packaged metadata kept for compatibility
+- `ip_repo/e_uart/component.xml`: authoritative packaged metadata for Vivado repository discovery
 - `tools/repackage_ip.tcl`: updates register metadata and checksums for a selected `component.xml`
 - `package_ip_core.tcl`: rebuilds `ip_repo/e_uart/` from the packaged collateral in this repo
-- `ip_repo/e_uart/component.xml`: generated packaged metadata for Vivado repository discovery
+- `package_ip_core.tcl` uses the committed `ip_repo/e_uart/component.xml` as the packaging template and refreshes it in place
 - `drivers/e_uart_v1_0/src/e_uart.h`: software-visible register field definitions
 - Current packaged supported families: `zynq`, `zynquplus`, `spartanuplus`
 
