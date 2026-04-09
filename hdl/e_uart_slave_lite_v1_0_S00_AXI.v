@@ -38,6 +38,7 @@
         output wire [9:0]  over_sample_clk_cnt,
         output wire [10:0] rx_int_holdoff_byte_time_cnt,
         output wire [10:0] rx_int_holdoff_byte_cnt,
+        output reg         rx_time_coal_intr_clr,
         output wire tx_en,
         output reg  [7:0]  tx_byte_host,
         output reg         tx_byte_host_dv,
@@ -272,6 +273,7 @@ wire is_reg3_posedge;
 	      slv_reg11 <= 0;
 	      slv_reg12 <= 0;
 	      slv_reg13 <= 0;
+	      rx_time_coal_intr_clr <= 1'b0;
 		      //slv_reg14 <= 0;
 		      //slv_reg15 <= 0;
 		      is_reg0_wr <= 0;
@@ -280,6 +282,7 @@ wire is_reg3_posedge;
 		  else begin
 		    is_reg0_wr <= {is_reg0_wr[0], 1'b0};
 		    is_reg1_wr <= {is_reg1_wr[0], 1'b0};
+            rx_time_coal_intr_clr <= 1'b0;
 
 		    if (slv_reg_wren)
 		      begin
@@ -318,13 +321,10 @@ wire is_reg3_posedge;
 	                slv_reg3[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
 	              end
 */	                
-	          4'h4:
-	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-	              if ( axi_wstrb[byte_index] == 1 ) begin
-	                // Respective byte enables are asserted as per write strobes 
-	                // Slave register 4
-	                slv_reg4[(byte_index*8) +: 8] <= axi_wdata[(byte_index*8) +: 8];
-		              end  
+	          4'h4: begin
+	            // INT_STATUS is read-only except RX_TIME_COALESCE, which is write-1-to-clear.
+	            rx_time_coal_intr_clr <= axi_wstrb[0] & axi_wdata[4];
+	          end
 		          4'h5:
 		            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
 		              if ( axi_wstrb[byte_index] == 1 ) begin

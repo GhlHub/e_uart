@@ -81,9 +81,9 @@ Note: All registers are 32-bits wide.
 | 0x04 | Transmit Word Register | Write 32-bit word to TX FIFO  |
 | 0x08 | Receive Byte Register | Read 8-bit byte from RX FIFO |
 | 0x0c | Receive Word Register | Read 32-bit word from RX FIFO |
-| 0x10 | Interrupt Status Register | |
-| 0x14 | Interrupt Status Mask Register | |
-| 0x18 | Config / Status Register | |
+| 0x10 | Interrupt Status Register | Live interrupt state; `RX_TIME_COALESCE` is write-1-to-clear |
+| 0x14 | Interrupt Status Mask Register | Per-source interrupt mask bits |
+| 0x18 | Config / Status Register | TX/RX enable bits and current IRQ pin state |
 | 0x1c | Reserved | |
 | 0x20 | Baud Rate Counter Register - BCR | AXI Clock Divisor for Transmit Baudrate |
 | 0x24 | Oversample Rate Counter Register | AXI Clock Divisor for Receive oversampling rate |
@@ -138,6 +138,9 @@ Care should be taken not to underrun the Receive FIFO as there are no checks in 
 | 31:5 | 4 | 3 | 2 | 1 | 0 |
 | - | - | - | - | - | - |
 | Reserved | Rx Time Coalesce Interrupt | Rx Byte Threshold Coalesce Interrupt | Rx FIFO Not Empty Interrupt | Tx Fifo Almost Empty Interrupt | Tx Empty Interrupt |
+
+- `RX_TIME_COALESCE` is sticky. Write `1` to bit 4 at offset `0x10` to clear it.
+- After software clears `RX_TIME_COALESCE`, the timeout counter restarts from zero immediately if the RX FIFO is still non-empty.
 
 ### Interrupt Mask Register
 | 31:5 | 4 | 3 | 2 | 1 | 0 |

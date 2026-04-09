@@ -67,13 +67,13 @@ ensure_register $addr_block RX_WORD_FIFO "Receive Word Register" \
     }
 
 ensure_register $addr_block INT_STATUS "Interrupt Status Register" \
-    "Current interrupt status bits." \
-    0x010 read-only {
+    "Current interrupt status bits. RX_TIME_COALESCE is write-1-to-clear." \
+    0x010 read-write {
         {TX_EMPTY 0 1 read-only "Transmit FIFO empty interrupt status"}
         {TX_FIFO_ALMOST_EMPTY 1 1 read-only "Transmit FIFO almost empty interrupt status"}
         {RX_FIFO_NOT_EMPTY 2 1 read-only "Receive FIFO not empty interrupt status"}
         {RX_BYTE_THRESHOLD 3 1 read-only "Receive FIFO byte threshold interrupt status"}
-        {RX_TIME_COALESCE 4 1 read-only "Receive timeout coalescing interrupt status"}
+        {RX_TIME_COALESCE 4 1 read-write "Receive timeout coalescing interrupt status. Write 1 to clear."}
     }
 
 ensure_register $addr_block INT_MASK "Interrupt Mask Register" \

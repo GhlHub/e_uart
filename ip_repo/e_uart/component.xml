@@ -384,10 +384,10 @@
         <spirit:register>
           <spirit:name>INT_STATUS</spirit:name>
           <spirit:displayName>Interrupt Status Register</spirit:displayName>
-          <spirit:description>Current interrupt status bits.</spirit:description>
+          <spirit:description>Current interrupt status bits. RX_TIME_COALESCE is write-1-to-clear.</spirit:description>
           <spirit:addressOffset>0x010</spirit:addressOffset>
           <spirit:size spirit:format="long">32</spirit:size>
-          <spirit:access>read-only</spirit:access>
+          <spirit:access>read-write</spirit:access>
           <spirit:field>
             <spirit:name>TX_EMPTY</spirit:name>
             <spirit:description>Transmit FIFO empty interrupt status</spirit:description>
@@ -438,10 +438,10 @@
           </spirit:field>
           <spirit:field>
             <spirit:name>RX_TIME_COALESCE</spirit:name>
-            <spirit:description>Receive timeout coalescing interrupt status</spirit:description>
+            <spirit:description>Receive timeout coalescing interrupt status. Write 1 to clear.</spirit:description>
             <spirit:bitOffset>4</spirit:bitOffset>
             <spirit:bitWidth spirit:format="long">1</spirit:bitWidth>
-            <spirit:access>read-only</spirit:access>
+            <spirit:access>read-write</spirit:access>
             <spirit:writeValueConstraint>
               <spirit:minimum>0</spirit:minimum>
               <spirit:maximum>0</spirit:maximum>
@@ -693,7 +693,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>d6d38d0b</spirit:value>
+            <spirit:value>c2e01b76</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -712,7 +712,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>d6d38d0b</spirit:value>
+            <spirit:value>c2e01b76</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -726,7 +726,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>35a6ba75</spirit:value>
+            <spirit:value>41e70943</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1195,7 +1195,7 @@
       <spirit:file>
         <spirit:name>hdl/e_uart.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_5e325976</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_8712d7d2</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -1373,13 +1373,13 @@
       </xilinx:xpmLibraries>
       <xilinx:vendorDisplayName>Silicon Food Group</xilinx:vendorDisplayName>
       <xilinx:coreRevision>19</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2026-03-30T02:54:32Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2026-04-09T15:54:44Z</xilinx:coreCreationDateTime>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2025.2</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="4da56be0"/>
-      <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="e94119d2"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="a0ce8d5b"/>
+      <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="e93afad1"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="9da8d7e5"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="d702df76"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="e7b50784"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="cc37cf56"/>

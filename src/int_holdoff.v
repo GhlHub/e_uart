@@ -26,6 +26,7 @@ module int_holdoff(
     baud_clk_cnt,
     rx_int_holdoff_byte_time_cnt,
     rx_int_holdoff_byte_cnt,
+    rx_time_coal_intr_clr,
     rx_empty,
     rx_byte_count,
     
@@ -40,6 +41,7 @@ input rst;
 input [12:0] baud_clk_cnt;
 input [10:0] rx_int_holdoff_byte_time_cnt;
 input [10:0] rx_int_holdoff_byte_cnt;
+input rx_time_coal_intr_clr;
 input rx_empty;
 input [10:0] rx_byte_count;
 
@@ -89,22 +91,35 @@ always@(posedge clk) begin
 end
 
 always@(posedge clk) begin
-    casex({rst, rx_empty_negedge, rx_empty_posedge, rx_time_coal_intr})
-        4'b1xxx:  byte_time_cntr_en <= 1'b0;
-        4'b0001:  byte_time_cntr_en <= 1'b0;
-        4'b01xx:  byte_time_cntr_en <= 1'b1;
-        4'b001x:  byte_time_cntr_en <= 1'b0;
-        default:  byte_time_cntr_en <= byte_time_cntr_en;    
-    endcase
-    
-    casex({rst, rx_empty_posedge, (byte_time_cntr_en & elapsed_bit_time_eq_9 & ~rx_time_coal_intr)})
-        3'b1xx:  byte_time_cntr <= 0;
-        3'b01x:  byte_time_cntr <= 0;
-        3'b001:  byte_time_cntr <= byte_time_cntr + 1;
-        default: byte_time_cntr <= byte_time_cntr;
-    endcase
+    if (rst) begin
+        byte_time_cntr_en <= 1'b0;
+        byte_time_cntr <= 0;
+        rx_time_coal_intr <= 1'b0;
+    end else if (rx_time_coal_intr_clr) begin
+        byte_time_cntr_en <= ~rx_empty;
+        byte_time_cntr <= 0;
+        rx_time_coal_intr <= 1'b0;
+    end else if (rx_time_coal_intr) begin
+        byte_time_cntr_en <= 1'b0;
+        byte_time_cntr <= byte_time_cntr;
+        rx_time_coal_intr <= 1'b1;
+    end else begin
+        casex({rx_empty_negedge, rx_empty_posedge, (byte_time_cntr_en & (byte_time_cntr >= rx_int_holdoff_byte_time_cnt))})
+            3'b1xx:  byte_time_cntr_en <= 1'b1;
+            3'b01x:  byte_time_cntr_en <= 1'b0;
+            3'b001:  byte_time_cntr_en <= 1'b0;
+            default: byte_time_cntr_en <= byte_time_cntr_en;
+        endcase
 
-    rx_time_coal_intr <= rst ? 1'b0 : (byte_time_cntr_en && (byte_time_cntr >= rx_int_holdoff_byte_time_cnt));    
+        casex({rx_empty_negedge, rx_empty_posedge, (byte_time_cntr_en & elapsed_bit_time_eq_9)})
+            3'b1xx:  byte_time_cntr <= 0;
+            3'b01x:  byte_time_cntr <= 0;
+            3'b001:  byte_time_cntr <= byte_time_cntr + 1;
+            default: byte_time_cntr <= byte_time_cntr;
+        endcase
+
+        rx_time_coal_intr <= byte_time_cntr_en && (byte_time_cntr >= rx_int_holdoff_byte_time_cnt);
+    end
 end
 
 

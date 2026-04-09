@@ -48,6 +48,7 @@ wire [12:0] baud_clk_cnt;
 wire [9:0] over_sample_clk_cnt;
 wire [10:0] rx_int_holdoff_byte_time_cnt;
 wire [10:0] rx_int_holdoff_byte_cnt;
+wire rx_time_coal_intr_clr;
 wire tx_en;
 wire [7:0] tx_byte_host;
 wire tx_byte_host_dv;
@@ -119,6 +120,7 @@ e_uart_slave_lite_v1_0_S00_AXI dut_axi(
     .over_sample_clk_cnt         (over_sample_clk_cnt),
     .rx_int_holdoff_byte_time_cnt(rx_int_holdoff_byte_time_cnt),
     .rx_int_holdoff_byte_cnt     (rx_int_holdoff_byte_cnt),
+    .rx_time_coal_intr_clr       (rx_time_coal_intr_clr),
     .tx_en                       (tx_en),
     .tx_byte_host                (tx_byte_host),
     .tx_byte_host_dv             (tx_byte_host_dv),
@@ -159,6 +161,7 @@ int_holdoff dut_holdoff(
     .baud_clk_cnt                (baud_clk_cnt),
     .rx_int_holdoff_byte_time_cnt(rx_int_holdoff_byte_time_cnt),
     .rx_int_holdoff_byte_cnt     (rx_int_holdoff_byte_cnt),
+    .rx_time_coal_intr_clr       (rx_time_coal_intr_clr),
     .rx_empty                    (rx_empty),
     .rx_byte_count               (rx_byte_count),
     .rx_time_coal_intr           (rx_time_coal_intr),
@@ -169,6 +172,12 @@ task automatic step;
 begin
     @(posedge clk);
     #1;
+end
+endtask
+
+task automatic axi_clear_time_interrupt;
+begin
+    axi_write(REG_INT_STAT[5:0], INT_RX_TIME[31:0]);
 end
 endtask
 
@@ -613,11 +622,39 @@ begin
     wait_for_intr_high("AXI time threshold interrupt propagation");
     check(intr, "interrupt output eventually asserts after the masked time interrupt status bit");
 
+    axi_clear_time_interrupt();
+    axi_read(REG_INT_STAT[5:0], readback);
+    check(!readback[4], "time interrupt status clears on write-one-to-clear");
+    check(!intr, "interrupt output clears after software clears the sticky time interrupt");
+    check(dut_holdoff.byte_time_cntr == 11'd0, "time interrupt clear resets the byte-time counter");
+    check(dut_holdoff.byte_time_cntr_en, "time interrupt clear re-arms counting while RX FIFO remains non-empty");
+
+    wait_for_byte_time_count(1, "AXI time threshold after clear");
+    axi_read(REG_INT_STAT[5:0], readback);
+    check(!readback[4], "time interrupt status stays low after clear and one byte time");
+
+    wait_for_byte_time_count(2, "AXI time threshold after clear");
+    axi_read(REG_INT_STAT[5:0], readback);
+    check(!readback[4], "time interrupt status stays low after clear and two byte times");
+
+    wait_for_byte_time_count(3, "AXI time threshold after clear");
+    check(!rx_time_coal_intr, "time interrupt source is low when the restarted threshold count is first reached");
+
+    step();
+    axi_read(REG_INT_STAT[5:0], readback);
+    check(readback[4], "time interrupt status reasserts after clear when RX FIFO stays non-empty");
+    check(intr, "interrupt output reasserts after the restarted time threshold expires");
+
     set_rx_fifo(1'b1, 0);
     step();
     axi_read(REG_INT_STAT[5:0], readback);
-    check(!readback[4], "time interrupt status clears when RX FIFO empties");
-    check(!intr, "interrupt output clears after RX FIFO empties");
+    check(readback[4], "time interrupt status remains set after RX FIFO empties until software clears it");
+    check(intr, "interrupt output remains asserted after RX FIFO empties while the sticky time interrupt is uncleared");
+
+    axi_clear_time_interrupt();
+    axi_read(REG_INT_STAT[5:0], readback);
+    check(!readback[4], "time interrupt status clears when software writes INT_STATUS[4]");
+    check(!intr, "interrupt output clears after software clears the sticky time interrupt while RX FIFO is empty");
 end
 endtask
 

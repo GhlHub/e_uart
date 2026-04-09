@@ -157,6 +157,9 @@ void EUart_Isr(PEUart pUart) {
 			rx_bytes_avail = EUart_RecvFifoOccupancy(pUart);
 			pUart->rxHandler(pUart->rxCallbackRef, rx_bytes_avail);
 		}
+		if(intStatus & EA_INT_STAT_RX_COALSC_TIME) {
+			E_UART_mWriteReg(pUart->BaseAddress, EA_INT_STAT_OFFSET, EA_INT_STAT_RX_COALSC_TIME);
+		}
 		//EUart_EnableRxInterrupt(pUart);
 	}
 	if(intStatus & (EA_INT_STAT_TX_AE |
@@ -189,4 +192,3 @@ void EUart_SetTxHandler(PEUart pUart, EUart_Handler FuncPtr, void *CallBackRef) 
 static void StubHandler(void *CallBackRef, unsigned int ByteCount) {
 	Xil_AssertVoidAlways();
 }
-

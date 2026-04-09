@@ -74,6 +74,7 @@ wire  [12:0] baud_clk_cnt;
 wire  [9:0]  over_sample_clk_cnt;
 wire  [10:0] rx_int_holdoff_byte_time_cnt;
 wire  [10:0]  rx_int_holdoff_byte_cnt;
+wire         rx_time_coal_intr_clr;
 wire  tx_en;
 wire  [7:0]  tx_byte_host;
 wire         tx_byte_host_dv;
@@ -118,6 +119,7 @@ wire [10:0] rx_byte_count;
         .over_sample_clk_cnt        (over_sample_clk_cnt),
         .rx_int_holdoff_byte_time_cnt     (rx_int_holdoff_byte_time_cnt),
         .rx_int_holdoff_byte_cnt    (rx_int_holdoff_byte_cnt),
+        .rx_time_coal_intr_clr      (rx_time_coal_intr_clr),
         .tx_en                      (tx_en),
         .tx_byte_host               (tx_byte_host),
         .tx_byte_host_dv            (tx_byte_host_dv),
@@ -141,6 +143,7 @@ uart_top uart_top(
     .over_sample_clk_cnt            (over_sample_clk_cnt),
     .rx_int_holdoff_byte_time_cnt         (rx_int_holdoff_byte_time_cnt),
     .rx_int_holdoff_byte_cnt        (rx_int_holdoff_byte_cnt),
+    .rx_time_coal_intr_clr          (rx_time_coal_intr_clr),
     .tx_en                          (tx_en),
     .tx_byte_host                   (tx_byte_host),
     .tx_byte_host_dv                (tx_byte_host_dv),

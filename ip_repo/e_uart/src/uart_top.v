@@ -29,6 +29,7 @@ module uart_top(
     over_sample_clk_cnt,    // 5x oversample rate counter
     rx_int_holdoff_byte_time_cnt,
     rx_int_holdoff_byte_cnt,
+    rx_time_coal_intr_clr,
     tx_en,
     tx_byte_host,           // tx byte from host
     tx_byte_host_dv,        // data valid flag from host
@@ -50,6 +51,7 @@ input  [12:0] baud_clk_cnt;
 input  [9:0]  over_sample_clk_cnt;
 input  [10:0] rx_int_holdoff_byte_time_cnt;
 input  [10:0] rx_int_holdoff_byte_cnt;
+input         rx_time_coal_intr_clr;
 input  tx_en;
 input  [7:0]  tx_byte_host;
 input         tx_byte_host_dv;
@@ -145,6 +147,7 @@ int_holdoff int_holdoff(
     .baud_clk_cnt   (baud_clk_cnt),
     .rx_int_holdoff_byte_time_cnt     (rx_int_holdoff_byte_time_cnt),
     .rx_int_holdoff_byte_cnt    (rx_int_holdoff_byte_cnt),
+    .rx_time_coal_intr_clr      (rx_time_coal_intr_clr),
     .rx_empty                   (rx_empty),
     .rx_byte_count              (rx_byte_count),
     

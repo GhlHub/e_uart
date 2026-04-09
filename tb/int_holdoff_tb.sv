@@ -12,6 +12,7 @@ reg rst;
 reg [12:0] baud_clk_cnt;
 reg [10:0] rx_int_holdoff_byte_time_cnt;
 reg [10:0] rx_int_holdoff_byte_cnt;
+reg rx_time_coal_intr_clr;
 reg rx_empty;
 reg [10:0] rx_byte_count;
 
@@ -40,6 +41,7 @@ int_holdoff dut(
     .baud_clk_cnt               (baud_clk_cnt),
     .rx_int_holdoff_byte_time_cnt(rx_int_holdoff_byte_time_cnt),
     .rx_int_holdoff_byte_cnt    (rx_int_holdoff_byte_cnt),
+    .rx_time_coal_intr_clr      (rx_time_coal_intr_clr),
     .rx_empty                   (rx_empty),
     .rx_byte_count              (rx_byte_count),
     .rx_time_coal_intr          (rx_time_coal_intr),
@@ -80,6 +82,7 @@ endtask
 task automatic reset_dut;
 begin
     rst = 1'b1;
+    rx_time_coal_intr_clr = 1'b0;
     rx_empty = 1'b1;
     rx_byte_count = 11'd0;
     rx_int_holdoff_byte_time_cnt = 11'd0;
@@ -95,6 +98,7 @@ task automatic reset_and_start_rx;
     input int initial_rx_count;
 begin
     rst = 1'b1;
+    rx_time_coal_intr_clr = 1'b0;
     rx_empty = 1'b1;
     rx_byte_count = 11'd0;
     repeat (4) step();
@@ -103,6 +107,16 @@ begin
     rx_empty = 1'b0;
     rx_byte_count = initial_rx_count[10:0];
     step();
+end
+endtask
+
+task automatic pulse_time_interrupt_clear;
+begin
+    @(negedge clk);
+    rx_time_coal_intr_clr = 1'b1;
+    step();
+    @(negedge clk);
+    rx_time_coal_intr_clr = 1'b0;
 end
 endtask
 
@@ -175,6 +189,8 @@ begin
 
     step();
     check(rx_time_coal_intr, "time threshold interrupt asserts one clock after the programmed byte-time threshold");
+    step();
+    check(rx_time_coal_intr, "time threshold interrupt remains asserted until cleared");
 end
 endtask
 
@@ -210,12 +226,44 @@ begin
 end
 endtask
 
+task automatic test_time_threshold_clear_and_restart;
+begin
+    log_info("Running test_time_threshold_clear_and_restart");
+
+    rx_int_holdoff_byte_cnt = 11'd1023;
+    rx_int_holdoff_byte_time_cnt = 11'd2;
+    reset_and_start_rx(1);
+
+    wait_for_byte_time_count(1, "time threshold clear test");
+    check(!rx_time_coal_intr, "time threshold interrupt stays low before the clear test threshold expires");
+
+    wait_for_byte_time_count(2, "time threshold clear test");
+    step();
+    check(rx_time_coal_intr, "time threshold interrupt asserts before software clear");
+
+    pulse_time_interrupt_clear();
+    check(!rx_time_coal_intr, "time threshold interrupt clears on software clear pulse");
+    check(dut.byte_time_cntr == 11'd0, "byte time counter resets when software clears the interrupt");
+    check(dut.byte_time_cntr_en, "byte time counter re-arms immediately while RX FIFO remains non-empty");
+
+    wait_for_byte_time_count(1, "time threshold clear test after re-arm");
+    check(!rx_time_coal_intr, "time threshold interrupt stays low after clear and one byte time");
+
+    wait_for_byte_time_count(2, "time threshold clear test after re-arm");
+    check(!rx_time_coal_intr, "time threshold interrupt still waits one clock after the restarted threshold count");
+
+    step();
+    check(rx_time_coal_intr, "time threshold interrupt reasserts after software clear when RX FIFO stays non-empty");
+end
+endtask
+
 initial begin
     clk = 1'b0;
     rst = 1'b1;
     baud_clk_cnt = BAUD_CLK_CNT[12:0];
     rx_int_holdoff_byte_time_cnt = 11'd0;
     rx_int_holdoff_byte_cnt = 11'd0;
+    rx_time_coal_intr_clr = 1'b0;
     rx_empty = 1'b1;
     rx_byte_count = 11'd0;
     checks_run = 0;
@@ -227,6 +275,7 @@ initial begin
     test_byte_threshold_exact();
     test_time_threshold_exact();
     test_time_threshold_restart_after_empty();
+    test_time_threshold_clear_and_restart();
 
     $display("[t=%0d ns] Completed %0d checks with %0d failures",
              sim_time_ns(), checks_run, checks_failed);
